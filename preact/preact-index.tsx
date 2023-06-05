@@ -4,14 +4,6 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { init, tick } from '../common/core'
 import { animate, rangeMap, defaultOptions } from '../common/util'
 
-declare module 'preact/src/jsx' {
-  namespace JSXInternal {
-    interface HTMLAttributes<RefType extends EventTarget = EventTarget> {
-      defaultValue?: HTMLAttributes['value']
-    }
-  }
-}
-
 const [useCellSize, setCellSize] = createSharedState(defaultOptions.cellSize)
 const [useWorldWidth, setWorldWidth] = createSharedState(defaultOptions.worldWidth)
 const [useWorldHeight, setWorldHeight] = createSharedState(defaultOptions.worldHeight)
@@ -123,7 +115,7 @@ const App = () => {
   return (
     <Fragment>
       <h1 style={{ textAlign: 'center' }}>
-        <Link href="https://preactjs.com/">Preact</Link> + {}
+        <Link href="https://preactjs.com/">Preact</Link> + { }
         <Link href="https://github.com/luncheon/preact-shared-state-hook">preact-shared-state-hook</Link>
       </h1>
       <main>

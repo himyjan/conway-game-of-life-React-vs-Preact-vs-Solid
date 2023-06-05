@@ -1,24 +1,24 @@
-import * as React from 'react'
+import React, { memo, ReactNode, StrictMode, useEffect, useRef, useState } from 'react'
 import { render } from 'react-dom'
-import { atom, RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { atom, useAtom } from 'jotai'
 import { init, tick } from '../common/core'
 import { animate, defaultOptions, rangeMap } from '../common/util'
 
-const cellSizeState = atom({ key: 'cellSize', default: defaultOptions.cellSize })
-const worldWidthState = atom({ key: 'worldWidth', default: defaultOptions.worldWidth })
-const worldHeightState = atom({ key: 'worldHeight', default: defaultOptions.worldHeight })
-const cellsState = atom({ key: 'cells', default: init(defaultOptions.worldWidth, defaultOptions.worldHeight) })
-const runningState = atom({ key: 'running', default: false })
-const fpsState = atom({ key: 'fps', default: 0 })
+const cellSizeState = atom(defaultOptions.cellSize)
+const worldWidthState = atom(defaultOptions.worldWidth)
+const worldHeightState = atom(defaultOptions.worldHeight)
+const cellsState = atom(init(defaultOptions.worldWidth, defaultOptions.worldHeight))
+const runningState = atom(false)
+const fpsState = atom(0)
 
-const Cell = React.memo(({ x, y }: { x: number; y: number }) => {
-  const cellSize = useRecoilValue(cellSizeState)
-  const cells = useRecoilValue(cellsState)
+const Cell = memo(({ x, y }: { x: number; y: number }) => {
+  const [cellSize] = useAtom(cellSizeState)
+  const [cells] = useAtom(cellsState)
   return <td className={cells.get(x, y) ? 'cell cell-alive' : 'cell'} style={{ width: cellSize, height: cellSize }} />
 })
 
-const Row = React.memo(({ y }: { y: number }) => {
-  const worldWidth = useRecoilValue(worldWidthState)
+const Row = memo(({ y }: { y: number }) => {
+  const [worldWidth] = useAtom(worldWidthState)
   return (
     <tr>
       {rangeMap(worldWidth, x => (
@@ -28,8 +28,8 @@ const Row = React.memo(({ y }: { y: number }) => {
   )
 })
 
-const World = React.memo(() => {
-  const worldHeight = useRecoilValue(worldHeightState)
+const World = memo(() => {
+  const [worldHeight] = useAtom(worldHeightState)
   return (
     <table style={{ tableLayout: 'fixed' }}>
       {rangeMap(worldHeight, y => (
@@ -39,19 +39,19 @@ const World = React.memo(() => {
   )
 })
 
-const Button = React.memo(({ onClick, children }: { onClick: () => void; children: React.ReactChild | React.ReactChild[] }) => (
+const Button = memo(({ onClick, children }: { onClick: () => void; children: ReactNode | ReactNode[] }) => (
   <button type="button" onClick={onClick}>
     {children}
   </button>
 ))
 
-const Controls = React.memo(() => {
-  const setCells = useSetRecoilState(cellsState)
-  const [cellSize, setCellSize] = useRecoilState(cellSizeState)
-  const [worldWidth, setWorldWidth] = useRecoilState(worldWidthState)
-  const [worldHeight, setWorldHeight] = useRecoilState(worldHeightState)
-  const [running, setRunning] = useRecoilState(runningState)
-  const fps = useRecoilValue(fpsState)
+const Controls = memo(() => {
+  const setCells = useAtom(cellsState)[1]
+  const [cellSize, setCellSize] = useAtom(cellSizeState)
+  const [worldWidth, setWorldWidth] = useAtom(worldWidthState)
+  const [worldHeight, setWorldHeight] = useAtom(worldHeightState)
+  const [running, setRunning] = useAtom(runningState)
+  const [fps] = useAtom(fpsState)
   return (
     <aside>
       <table>
@@ -83,22 +83,22 @@ const Controls = React.memo(() => {
   )
 })
 
-const Link = React.memo(({ href, children }: { href: string; children: React.ReactChild | React.ReactChild[] }) => (
+const Link = memo(({ href, children }: { href: string; children: ReactNode | ReactNode[] }) => (
   <a target="_blank" rel="noopener noreferrer" href={href}>
     {children}
   </a>
 ))
 
-const App = React.memo(() => {
-  const setFps = useSetRecoilState(fpsState)
-  const setCells = useSetRecoilState(cellsState)
-  const worldWidth = useRecoilValue(worldWidthState)
-  const worldHeight = useRecoilValue(worldHeightState)
-  const running = useRecoilValue(runningState)
-  const [cancel, setCancel] = React.useState<(() => void) | undefined>(undefined)
-  const firstTime = React.useRef(true)
+const App = memo(() => {
+  const setFps = useAtom(fpsState)[1]
+  const setCells = useAtom(cellsState)[1]
+  const [worldWidth] = useAtom(worldWidthState)
+  const [worldHeight] = useAtom(worldHeightState)
+  const [running] = useAtom(runningState)
+  const [cancel, setCancel] = useState<(() => void) | undefined>(undefined)
+  const firstTime = useRef(true)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (running) {
       setCancel(() => animate(() => setCells(tick), setFps))
     } else {
@@ -107,7 +107,7 @@ const App = React.memo(() => {
     }
   }, [running])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (firstTime.current) {
       firstTime.current = false
     } else {
@@ -129,10 +129,8 @@ const App = React.memo(() => {
 })
 
 render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <App />
-    </RecoilRoot>
-  </React.StrictMode>,
-  document.body.appendChild(document.createElement('div')),
+  <StrictMode>
+    <App />
+  </StrictMode>,
+  document.body.appendChild(document.createElement('div'))
 )

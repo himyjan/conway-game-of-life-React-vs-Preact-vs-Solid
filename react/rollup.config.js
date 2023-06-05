@@ -2,8 +2,8 @@ import babel from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
-import { terser } from 'rollup-plugin-terser'
-import compressedSize from '../rollup-plugin-compressed-size'
+import terser from '@rollup/plugin-terser'
+import filesize from 'rollup-plugin-filesize'
 
 export default {
   input: 'react-index.tsx',
@@ -21,7 +21,7 @@ export default {
       babelHelpers: 'bundled',
     }),
     terser({ format: { comments: false } }),
-    compressedSize(),
+    filesize(),
   ],
   watch: { clearScreen: false },
 }
